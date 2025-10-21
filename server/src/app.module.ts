@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TracingModule } from './tracing/tracing.module';
 import { ExecutorModule } from './executor/executor.module';
+import { CoordinatorModule } from './coordinator/coordinator.module';
 
 @Module({
-  imports: [TracingModule, ExecutorModule],
+  imports: [ExecutorModule, CoordinatorModule],
   controllers: [],
   providers: [],
 })
