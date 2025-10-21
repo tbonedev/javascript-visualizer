@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TracingController } from './tracing.controller';
-import { TracingService } from './tracing.service';
+import { CoordinatorService } from './coordinator.service';
+import { CoordinatorController } from './coordinator.controller';
+import { ExecutorModule } from 'src/executor/executor.module';
 
 @Module({
-  controllers: [TracingController],
-  providers: [TracingService],
+  imports: [ExecutorModule],
+  controllers: [CoordinatorController],
+  providers: [CoordinatorService],
 })
-export class TracingModule {}
+export class CoordinatorModule {}
