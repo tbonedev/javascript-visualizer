@@ -1,5 +1,6 @@
+import { ExecutionStep } from '../interfaces/execution-step.interface';
 
 export interface TraceData {
-  step: Step[];
+  step: ExecutionStep[];
   totalSteps: number;
 }
