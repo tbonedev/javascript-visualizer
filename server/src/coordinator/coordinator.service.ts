@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ExecuteInputDto } from './dto/execute-input.dto';
 import { ExecutionResult } from './types/execution-result';
-import { ExecutorService } from 'src/executor/executor.service';
-
+import { ExecutorService } from '../executor/executor.service';
 @Injectable()
 export class CoordinatorService {
   constructor(private readonly executorService: ExecutorService) {}

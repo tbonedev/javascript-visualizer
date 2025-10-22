@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CoordinatorService } from './coordinator.service';
 import { CoordinatorController } from './coordinator.controller';
-import { ExecutorModule } from 'src/executor/executor.module';
+import { ExecutorModule } from '../executor/executor.module';
 
 @Module({
   imports: [ExecutorModule],

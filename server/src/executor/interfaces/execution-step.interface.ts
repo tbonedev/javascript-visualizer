@@ -4,7 +4,7 @@ export interface ExecutionStep {
   step: number;
   line: number;
   code: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
 
   callStack?: StackFrame[];
   // heap?: HeapObject[];

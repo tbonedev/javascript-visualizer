@@ -1,4 +1,4 @@
-import { ExecutionStep } from 'src/executor/interfaces/execution-step.interface';
+import { ExecutionStep } from '../../executor/interfaces';
 
 export interface ExecutionResult {
   success: boolean;
