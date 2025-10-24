@@ -59,8 +59,6 @@ export class BreakpointService implements IBreakpointService {
       });
       breakpointCount++;
     }
-    console.log(
-      `✅ Set ${breakpointCount} breakpoints for script ${scriptId}`,
-    );
+    console.log(`✅ Set ${breakpointCount} breakpoints for script ${scriptId}`);
   }
 }
