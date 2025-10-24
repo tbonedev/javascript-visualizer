@@ -11,7 +11,6 @@ export class StepCollectorService implements IStepCollectorService {
   private steps: ExecutionStep[] = [];
   private stepCounter: number = 0;
   private processingQueue: Promise<void> = Promise.resolve(); // Очередь для последовательной обработки
-  private lastProcessedLine: number = -1; // Для отслеживания дубликатов
 
   private readonly MAX_STEPS = 1001;
   constructor(
@@ -79,22 +78,8 @@ export class StepCollectorService implements IStepCollectorService {
       return;
     }
 
-    // ПРОВЕРКА НА ДУБЛИКАТЫ: Пропускаем если это та же строка что и предыдущая
-    if (lineNumber === this.lastProcessedLine) {
-      console.log(`⏭️  Skipping duplicate line: ${lineNumber}`);
-      try {
-        await this.v8Inspector.post('Debugger.resume');
-      } catch (error) {
-        if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
-      }
-      return;
-    }
-
     // Извлекаем scope через ScopeExtractor
     const scope = await this.scopeExtractor.extractScope(currentFrame);
-
-    // Обновляем последнюю обработанную строку
-    this.lastProcessedLine = lineNumber;
 
     // Создаем шаг выполнения
     const step: ExecutionStep = {
@@ -146,7 +131,6 @@ export class StepCollectorService implements IStepCollectorService {
     this.steps = [];
     this.stepCounter = 0;
     this.processingQueue = Promise.resolve(); // Сбрасываем очередь
-    this.lastProcessedLine = -1; // Сбрасываем последнюю обработанную строку
     this.variableSerializer.reset(); // ← Сбрасываем circular guard!
   }
 }
