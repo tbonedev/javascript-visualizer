@@ -33,38 +33,45 @@ export class ScopeExtractorService implements IScopeExtractorService {
   ): Promise<Record<string, unknown>> {
     const locals: Record<string, unknown> = {};
 
-    // Сначала пробуем найти local scope
-    const localScope = frame.scopeChain.find((s) => s.type === 'local');
-
-    if (localScope && localScope.object.objectId) {
+    // Проверяем script scope (глобальные переменные пользователя)
+    const scriptScope = frame.scopeChain.find((s) => s.type === 'script');
+    if (scriptScope && scriptScope.object.objectId) {
       const properties = await this.variableSerializer.getProperties(
-        localScope.object.objectId,
+        scriptScope.object.objectId,
       );
-
       properties.forEach((prop) => {
         locals[prop.name] = prop.value;
       });
     }
 
-    // Если local пустой, проверяем script scope (для глобального уровня)
-    if (Object.keys(locals).length === 0) {
-      const scriptScope = frame.scopeChain.find((s) => s.type === 'script');
+    // Проверяем local scope (параметры и локальные переменные функции)
+    const localScope = frame.scopeChain.find((s) => s.type === 'local');
+    if (localScope && localScope.object.objectId) {
+      const properties = await this.variableSerializer.getProperties(
+        localScope.object.objectId,
+      );
+      properties.forEach((prop) => {
+        locals[prop.name] = prop.value;
+      });
+    }
 
-      if (scriptScope && scriptScope.object.objectId) {
+    // Проверяем block scope (переменные в циклах, if, и т.д.) - последними для приоритета
+    const blockScopes = frame.scopeChain.filter((s) => s.type === 'block');
+    for (const blockScope of blockScopes) {
+      if (blockScope.object.objectId) {
         const properties = await this.variableSerializer.getProperties(
-          scriptScope.object.objectId,
+          blockScope.object.objectId,
         );
-
         properties.forEach((prop) => {
           locals[prop.name] = prop.value;
         });
       }
+    }
 
-      // Если всё ещё пусто, добавляем пользовательские функции
-      if (Object.keys(locals).length === 0) {
-        const userFunctions = this.userFunctionParser.getFunctionsForScope();
-        Object.assign(locals, userFunctions);
-      }
+    // Если всё ещё пусто, добавляем пользовательские функции
+    if (Object.keys(locals).length === 0) {
+      const userFunctions = this.userFunctionParser.getFunctionsForScope();
+      Object.assign(locals, userFunctions);
     }
 
     return locals;
