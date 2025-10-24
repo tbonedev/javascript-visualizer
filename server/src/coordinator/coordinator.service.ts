@@ -14,6 +14,7 @@ export class CoordinatorService {
       success: true,
       trace,
       originalCode: dto.code,
+      totalSteps: trace.length,
     };
   }
 }
