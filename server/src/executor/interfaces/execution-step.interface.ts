@@ -1,10 +1,11 @@
 import { StackFrame } from './stack-frame.interface';
+import { Scope } from './scope.interface';
 
 export interface ExecutionStep {
   step: number;
   line: number;
   code: string;
-  variables: Record<string, unknown>;
+  scope: Scope;
 
   callStack?: StackFrame[];
   // heap?: HeapObject[];
