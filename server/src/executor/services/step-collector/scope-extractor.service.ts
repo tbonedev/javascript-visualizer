@@ -22,7 +22,7 @@ export class ScopeExtractorService implements IScopeExtractorService {
     return {
       local: await this.extractLocalVariables(frame),
       closure: await this.extractClosureVariables(frame),
-      global: this.extractGlobalVariables(),
+      global: await this.extractGlobalVariables(frame),
     };
   }
   /**
@@ -32,17 +32,6 @@ export class ScopeExtractorService implements IScopeExtractorService {
     frame: inspector.Debugger.CallFrame,
   ): Promise<Record<string, unknown>> {
     const locals: Record<string, unknown> = {};
-
-    // Проверяем script scope (глобальные переменные пользователя)
-    const scriptScope = frame.scopeChain.find((s) => s.type === 'script');
-    if (scriptScope && scriptScope.object.objectId) {
-      const properties = await this.variableSerializer.getProperties(
-        scriptScope.object.objectId,
-      );
-      properties.forEach((prop) => {
-        locals[prop.name] = prop.value;
-      });
-    }
 
     // Проверяем local scope (параметры и локальные переменные функции)
     const localScope = frame.scopeChain.find((s) => s.type === 'local');
@@ -106,12 +95,24 @@ export class ScopeExtractorService implements IScopeExtractorService {
   }
 
   /**
-   * Извлекает глобальные переменные
-   * Пока возвращает пустой объект (глобальные переменные обычно не нужны)
+   * Извлекает глобальные переменные из script scope
+   * (переменные верхнего уровня: let/const/var)
    */
-  extractGlobalVariables(): Record<string, unknown> {
+  async extractGlobalVariables(
+    frame: inspector.Debugger.CallFrame,
+  ): Promise<Record<string, unknown>> {
     const globals: Record<string, unknown> = {};
-    // Глобальные переменные обычно не нужны в визуализации
+
+    const scriptScope = frame.scopeChain.find((s) => s.type === 'script');
+    if (scriptScope && scriptScope.object.objectId) {
+      const properties = await this.variableSerializer.getProperties(
+        scriptScope.object.objectId,
+      );
+      properties.forEach((prop) => {
+        globals[prop.name] = prop.value;
+      });
+    }
+
     return globals;
   }
 }

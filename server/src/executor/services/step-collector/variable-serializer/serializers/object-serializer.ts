@@ -20,10 +20,13 @@ export class ObjectSerializer {
     objectId: string,
     extractValueFn: (value: any) => Promise<unknown>,
   ): Promise<Record<string, unknown>> {
-    // Проверка на циркулярные ссылки
-    if (this.circularGuard.checkAndMark(objectId)) {
-      return { '[Circular]': true };
+    // Проверка на превышение максимальной глубины
+    if (this.circularGuard.isMaxDepthReached()) {
+      return { '[Object]': '...' };
     }
+
+    // Входим в объект
+    this.circularGuard.enterObject();
 
     const obj: Record<string, unknown> = {};
 
@@ -73,6 +76,9 @@ export class ObjectSerializer {
     } catch (error) {
       console.error('Error extracting object:', error);
     }
+
+    // Выходим из объекта
+    this.circularGuard.exitObject();
 
     return obj;
   }

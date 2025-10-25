@@ -1,31 +1,46 @@
 /**
- * Defense from circular links during object serialization
+ * Defense from infinite loops during object serialization
+ * Simply limits depth to prevent backend overload
  */
 
 export class CircularGuard {
-  private visited: Set<string> = new Set();
+  private depth: number = 0;
+  private readonly MAX_DEPTH = 1; // только 1 уровень вложенности для объектов
 
-  isVisited(objectId: string): boolean {
-    return this.visited.has(objectId);
+  /**
+   * Входим в объект - увеличиваем глубину
+   */
+  enterObject(): void {
+    this.depth++;
   }
 
-  markVisited(objectId: string): void {
-    this.visited.add(objectId);
-  }
-
-  checkAndMark(objectId: string): boolean {
-    if (this.isVisited(objectId)) {
-      return true;
+  /**
+   * Выходим из объекта - уменьшаем глубину
+   */
+  exitObject(): void {
+    if (this.depth > 0) {
+      this.depth--;
     }
-    this.markVisited(objectId);
-    return false;
   }
 
+  /**
+   * Проверка превышения максимальной глубины
+   */
+  isMaxDepthReached(): boolean {
+    return this.depth >= this.MAX_DEPTH;
+  }
+
+  /**
+   * Сбросить состояние
+   */
   reset(): void {
-    this.visited.clear();
+    this.depth = 0;
   }
 
-  geCount(): number {
-    return this.visited.size;
+  /**
+   * Получить текущую глубину
+   */
+  getDepth(): number {
+    return this.depth;
   }
 }

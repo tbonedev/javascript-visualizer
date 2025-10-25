@@ -11,16 +11,19 @@ export class ArraySerializer {
   ) {}
 
   /**
-   * Extracts elements from array 
+   * Extracts elements from array
    */
   async serialize(
     objectId: string,
     extractValueFn: (value: any) => Promise<unknown>,
   ): Promise<unknown[]> {
-    // Проверка на циркулярные ссылки
-    if (this.circularGuard.checkAndMark(objectId)) {
-      return ['[Circular]'];
+    // Проверка на превышение максимальной глубины
+    if (this.circularGuard.isMaxDepthReached()) {
+      return ['[Array]', '...'];
     }
+
+    // Входим в массив
+    this.circularGuard.enterObject();
 
     const arr: unknown[] = [];
 
@@ -63,6 +66,9 @@ export class ArraySerializer {
     } catch (error) {
       console.error('Error extracting array:', error);
     }
+
+    // Выходим из массива
+    this.circularGuard.exitObject();
 
     return arr;
   }

@@ -25,5 +25,7 @@ export interface IScopeExtractorService {
   /**
    * Extracts global variables
    */
-  extractGlobalVariables(): Record<string, unknown>;
+  extractGlobalVariables(
+    frame: inspector.Debugger.CallFrame,
+  ): Promise<Record<string, unknown>>;
 }
