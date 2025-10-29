@@ -1,74 +1,116 @@
 'use client';
 
+import { executeCode } from '@/services/api/api';
 import CodeEditor from './CodeEditor';
 import { useState } from 'react';
+interface LeftPanelProps {
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  executionResult: any;
+  setExecutionResult: (result: any) => void;
+}
+export default function LeftPanel({
+  currentStep,
+  setCurrentStep,
+  executionResult,
+  setExecutionResult,
+}: LeftPanelProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState('// Your code here');
 
-export default function LeftPanel() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 10; // Общее количество шагов
+  const totalSteps = executionResult?.totalSteps || 0;
 
-  const handleStepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentStep(parseInt(e.target.value));
+  const handleVisualize = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const codeWithExtraLine = code + '\nundefined;';
+      console.log('📤 Sending code to backend:');
+      console.log(codeWithExtraLine);
+      console.log('Lines:', codeWithExtraLine.split('\n'));
+
+      const result = await executeCode(codeWithExtraLine);
+      setExecutionResult(result);
+      setCurrentStep(0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to execute code');
+    } finally {
+      setIsLoading(false);
+    }
   };
+  const handlePrev = () => setCurrentStep(Math.max(0, currentStep - 1));
+  const handleNext = () =>
+    setCurrentStep(Math.min(totalSteps - 1, currentStep + 1));
 
   return (
     <div className='flex flex-col h-full p-2.5'>
       <div className='h-[400px] rounded-3xl overflow-hidden border border-zinc-300 dark:border-zinc-800'>
-        <CodeEditor />
+        <CodeEditor value={code} onChange={setCode} />
       </div>
       <div className='flex-1'></div>
 
-      {/* Execution indicators */}
+      {error && (
+        <div className='mb-2 p-2 rounded-lg bg-red-500/10 border border-red-500 text-red-500 text-sm'>
+          {error}
+        </div>
+      )}
+
       <div className='flex flex-col gap-2 mb-2'>
         <div className='flex items-center gap-2'>
           <span className='text-green-500 text-3xl leading-none -translate-y-1'>
             →
           </span>
-          <span className='text-zinc-400 text-sm'>Current line</span>
+          <span className='text-zinc-400 text-base'>Current line</span>
         </div>
         <div className='flex items-center gap-2'>
           <span className='text-red-500 text-3xl leading-none -translate-y-1'>
             →
           </span>
-          <span className='text-zinc-400 text-sm'>Next line</span>
+          <span className='text-zinc-400 text-base'>Next line</span>
         </div>
       </div>
 
-      {/* Step Slider */}
       <div className='flex items-center gap-3 mb-2.5'>
         <span className='text-zinc-400 text-sm'>Step</span>
         <input
           type='range'
           min='0'
-          max={totalSteps - 1}
+          max={Math.max(0, totalSteps - 1)}
           value={currentStep}
-          onChange={handleStepChange}
-          className='flex-1 h-[12px] bg-zinc-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none 
-  [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full 
-  [&::-webkit-slider-thumb]:bg-zinc-600 [&::-webkit-slider-thumb]:cursor-pointer'
+          onChange={(e) => setCurrentStep(parseInt(e.target.value))}
+          disabled={!executionResult}
+          className='flex-1 h-[12px] bg-zinc-700 rounded-lg appearance-none cursor-pointer disabled:opacity-50
+  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+  [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-zinc-600 [&::-webkit-slider-thumb]:cursor-pointer'
         />
         <span className='text-zinc-400 text-sm font-mono'>
-          {currentStep + 1}/{totalSteps}
+          {totalSteps > 0 ? `${currentStep + 1}/${totalSteps}` : '0/0'}
         </span>
       </div>
 
-      {/* Buttons */}
-      <div className='rounded-2xl bg-[#282c34] border border-zinc-700 flex items-center justify-between px-3 py-2'>
+      <div className='rounded-2xl bg-zinc-600 border border-zinc-600 flex items-center justify-between px-3 py-2'>
         <button
-          className='px-4 py-1.5 rounded-lg bg-[#21252b] border border-zinc-700 hover:bg-[#2c313a] transition-colors 
-  text-zinc-200 text-sm'
+          onClick={handlePrev}
+          disabled={!executionResult || currentStep === 0}
+          className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
+  transition-colors text-zinc-200 text-sm'
         >
           Prev
         </button>
         <button
-          className='px-4 py-1.5 rounded-lg bg-[#21252b] border border-zinc-700 hover:bg-[#2c313a] transition-colors 
-  text-zinc-200 text-sm'
+          onClick={handleVisualize}
+          disabled={isLoading}
+          className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
+  transition-colors text-zinc-200 text-sm'
         >
-          Visualize
+          {isLoading ? 'Loading...' : 'Visualize'}
         </button>
         <button
-          className='px-4 py-1.5 rounded-lg bg-[#21252b] border border-zinc-700 hover:bg-[#2c313a] transition-colors 
-  text-zinc-200 text-sm'
+          onClick={handleNext}
+          disabled={!executionResult || currentStep >= totalSteps - 1}
+          className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
+  transition-colors text-zinc-200 text-sm'
         >
           Next
         </button>
