@@ -19,10 +19,22 @@ export class ScopeExtractorService implements IScopeExtractorService {
    * Извлекает полный scope из текущего call frame
    */
   async extractScope(frame: inspector.Debugger.CallFrame): Promise<Scope> {
+    console.log('🔍 Extracting scope...');
+    console.log('   scopeChain types:', frame.scopeChain.map(s => s.type));
+
+    const local = await this.extractLocalVariables(frame);
+    console.log('   📦 Local vars:', Object.keys(local));
+
+    const closure = await this.extractClosureVariables(frame);
+    console.log('   🔒 Closure vars:', Object.keys(closure));
+
+    const global = await this.extractGlobalVariables(frame);
+    console.log('   🌍 Global vars:', Object.keys(global));
+
     return {
-      local: await this.extractLocalVariables(frame),
-      closure: await this.extractClosureVariables(frame),
-      global: await this.extractGlobalVariables(frame),
+      local,
+      closure,
+      global,
     };
   }
   /**
@@ -35,10 +47,12 @@ export class ScopeExtractorService implements IScopeExtractorService {
 
     // Проверяем local scope (параметры и локальные переменные функции)
     const localScope = frame.scopeChain.find((s) => s.type === 'local');
+    console.log('      🔎 Local scope found:', !!localScope);
     if (localScope && localScope.object.objectId) {
       const properties = await this.variableSerializer.getProperties(
         localScope.object.objectId,
       );
+      console.log('      🔎 Local properties:', properties.map(p => p.name));
       properties.forEach((prop) => {
         locals[prop.name] = prop.value;
       });
@@ -46,11 +60,13 @@ export class ScopeExtractorService implements IScopeExtractorService {
 
     // Проверяем block scope (переменные в циклах, if, и т.д.) - последними для приоритета
     const blockScopes = frame.scopeChain.filter((s) => s.type === 'block');
+    console.log('      🔎 Block scopes found:', blockScopes.length);
     for (const blockScope of blockScopes) {
       if (blockScope.object.objectId) {
         const properties = await this.variableSerializer.getProperties(
           blockScope.object.objectId,
         );
+        console.log('      🔎 Block properties:', properties.map(p => p.name));
         properties.forEach((prop) => {
           locals[prop.name] = prop.value;
         });
@@ -104,10 +120,13 @@ export class ScopeExtractorService implements IScopeExtractorService {
     const globals: Record<string, unknown> = {};
 
     const scriptScope = frame.scopeChain.find((s) => s.type === 'script');
+    console.log('      🔎 Script scope found:', !!scriptScope);
     if (scriptScope && scriptScope.object.objectId) {
+      console.log('      🔎 Script objectId:', scriptScope.object.objectId);
       const properties = await this.variableSerializer.getProperties(
         scriptScope.object.objectId,
       );
+      console.log('      🔎 Script properties:', properties.map(p => p.name));
       properties.forEach((prop) => {
         globals[prop.name] = prop.value;
       });

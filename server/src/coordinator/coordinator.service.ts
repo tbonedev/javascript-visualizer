@@ -10,6 +10,11 @@ export class CoordinatorService {
     //validate input
 
     const trace = await this.executorService.execute(dto.code);
+
+    console.log('📤 Sending response to frontend:');
+    console.log('   totalSteps:', trace.length);
+    console.log('   Sample step (step 1):', JSON.stringify(trace[1], null, 2));
+
     return {
       success: true,
       trace,

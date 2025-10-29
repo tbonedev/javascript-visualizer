@@ -44,7 +44,11 @@ export class StepCollectorService implements IStepCollectorService {
   ): Promise<void> {
     // Проверка наличия call frames
     if (!params.callFrames || params.callFrames.length === 0) {
-      await this.v8Inspector.post('Debugger.resume');
+      try {
+        await this.v8Inspector.post('Debugger.stepOver');
+      } catch (error) {
+        if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
+      }
       return;
     }
 
@@ -54,7 +58,11 @@ export class StepCollectorService implements IStepCollectorService {
 
     // Проверка валидности номера строки
     if (lineNumber < 0 || lineNumber >= codeLines.length) {
-      await this.v8Inspector.post('Debugger.resume');
+      try {
+        await this.v8Inspector.post('Debugger.stepOver');
+      } catch (error) {
+        if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
+      }
       return;
     }
 
@@ -62,16 +70,22 @@ export class StepCollectorService implements IStepCollectorService {
 
     // Пропускаем пустые строки
     if (codeLine.trim().length === 0) {
-      await this.v8Inspector.post('Debugger.resume');
+      try {
+        await this.v8Inspector.post('Debugger.stepOver');
+      } catch (error) {
+        if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
+      }
       return;
     }
 
-    console.log(`⏸️  Paused at line: ${lineNumber}`);
+    console.log(`⏸️  Paused at line ${lineNumber}: "${codeLine.trim()}"`);
+    console.log(`    Reason: ${params.reason}`);
+    console.log(`    Call frames count: ${params.callFrames.length}`);
 
     if (this.stepCounter >= this.MAX_STEPS) {
       console.warn(`⚠️  Reached maximum steps limit: ${this.MAX_STEPS}`);
       try {
-        await this.v8Inspector.post('Debugger.resume');
+        await this.v8Inspector.post('Debugger.stepOver');
       } catch (error) {
         if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
       }
@@ -92,7 +106,8 @@ export class StepCollectorService implements IStepCollectorService {
 
     this.steps.push(step);
     try {
-      await this.v8Inspector.post('Debugger.resume');
+      // Используем stepOver вместо resume для пошагового выполнения
+      await this.v8Inspector.post('Debugger.stepOver');
     } catch (error) {
       if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
     }
@@ -121,6 +136,14 @@ export class StepCollectorService implements IStepCollectorService {
    * Возвращает собранные шаги выполнения
    */
   getSteps(): ExecutionStep[] {
+    console.log('📊 Final steps count:', this.steps.length);
+    this.steps.forEach((step, index) => {
+      console.log(`   Step ${index}:`);
+      console.log(`      Line: ${step.line}, Code: "${step.code}"`);
+      console.log(`      Global vars:`, Object.keys(step.scope.global));
+      console.log(`      Local vars:`, Object.keys(step.scope.local));
+      console.log(`      Closure vars:`, Object.keys(step.scope.closure));
+    });
     return this.steps;
   }
 
