@@ -32,14 +32,16 @@ export default function LeftPanel({
 
       const result = await executeCode(codeWithExtraLine);
       setExecutionResult(result);
-      setCurrentStep(1); // Начинаем с шага 1, т.к. шаг 0 пустой (breakpoint перед выполнением)
+      // Если totalSteps = 1, начинаем с 0, иначе с 1 (пропускаем пустой step 0)
+      setCurrentStep(result.totalSteps === 1 ? 0 : 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to execute code');
     } finally {
       setIsLoading(false);
     }
   };
-  const handlePrev = () => setCurrentStep(Math.max(1, currentStep - 1));
+  const minStep = totalSteps === 1 ? 0 : 1;
+  const handlePrev = () => setCurrentStep(Math.max(minStep, currentStep - 1));
   const handleNext = () =>
     setCurrentStep(Math.min(totalSteps - 1, currentStep + 1));
 
@@ -75,8 +77,8 @@ export default function LeftPanel({
         <span className='text-zinc-400 text-sm'>Step</span>
         <input
           type='range'
-          min='1'
-          max={Math.max(1, totalSteps - 1)}
+          min={minStep}
+          max={Math.max(minStep, totalSteps - 1)}
           value={currentStep}
           onChange={(e) => setCurrentStep(parseInt(e.target.value))}
           disabled={!executionResult}
@@ -85,14 +87,14 @@ export default function LeftPanel({
   [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-zinc-600 [&::-webkit-slider-thumb]:cursor-pointer'
         />
         <span className='text-zinc-400 text-sm font-mono'>
-          {totalSteps > 0 ? `${currentStep}/${totalSteps - 1}` : '0/0'}
+          {totalSteps > 0 ? `${currentStep + 1}/${totalSteps}` : '0/0'}
         </span>
       </div>
 
       <div className='rounded-2xl bg-zinc-600 border border-zinc-600 flex items-center justify-between px-3 py-2'>
         <button
           onClick={handlePrev}
-          disabled={!executionResult || currentStep === 1}
+          disabled={!executionResult || currentStep === minStep}
           className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
   transition-colors text-zinc-200 text-sm'
         >

@@ -13,6 +13,7 @@ export interface IScopeExtractorService {
    */
   extractLocalVariables(
     frame: inspector.Debugger.CallFrame,
+    isInsideFunction: boolean,
   ): Promise<Record<string, unknown>>;
 
   /**
@@ -20,6 +21,7 @@ export interface IScopeExtractorService {
    */
   extractClosureVariables(
     frame: inspector.Debugger.CallFrame,
+    isInsideFunction: boolean,
   ): Promise<Record<string, unknown>>;
 
   /**
@@ -27,5 +29,6 @@ export interface IScopeExtractorService {
    */
   extractGlobalVariables(
     frame: inspector.Debugger.CallFrame,
+    isInsideFunction: boolean,
   ): Promise<Record<string, unknown>>;
 }
