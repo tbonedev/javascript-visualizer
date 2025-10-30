@@ -15,8 +15,8 @@ export default function Chat() {
     <div className='flex flex-col w-full h-full'>
       <div className='flex-1 overflow-y-auto px-4 pt-6 pb-4'>
         {messages.length === 0 ? (
-          <div className='flex items-center justify-center h-full text-muted-foreground'>
-            <p>Start a conversation...</p>
+          <div className='flex items-center justify-center h-full'>
+            <p className='text-zinc-400'>Start a conversation...</p>
           </div>
         ) : (
           <div className='max-w-xl mx-auto'>
@@ -25,9 +25,9 @@ export default function Chat() {
                 <div
                   className={`${
                     message.role === 'user'
-                      ? 'bg-slate-200 dark:bg-slate-800 ml-auto'
+                      ? 'bg-white/[0.08] border border-white/[0.08] ml-auto'
                       : 'bg-transparent'
-                  } p-2 rounded-lg`}
+                  } p-3 rounded-xl backdrop-blur-sm text-zinc-200`}
                 >
                   {message.parts.map((part, i) => {
                     switch (part.type) {
@@ -63,7 +63,7 @@ export default function Chat() {
                   onChange={(event) => {
                     setInput(event.target.value);
                   }}
-                  className='w-[95%] mr-2 border-0 ring-offset-0 focus-visible:ring-0 focus-visible:outline-none focus:outline-none focus:ring-0 ring-0 focus-visible:border-none border-transparent focus:border-transparent focus-visible:ring-none'
+                  className='w-[95%] mr-2 border-0 ring-offset-0 focus-visible:ring-0 focus-visible:outline-none focus:outline-none focus:ring-0 ring-0 focus-visible:border-none border-transparent focus:border-transparent focus-visible:ring-none bg-transparent text-zinc-200'
                   placeholder='Ask me anything...'
                 />
                 <Button disabled={!input.trim()}>

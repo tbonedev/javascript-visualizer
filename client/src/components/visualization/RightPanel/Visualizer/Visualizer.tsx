@@ -1,7 +1,7 @@
 export default function Visualizer() {
   return (
-    <div>
-      <h1>Visualizer</h1>
+    <div className='h-full flex items-center justify-center'>
+      <h1 className='text-zinc-300 text-2xl font-bold'>Visualizer</h1>
     </div>
   );
 }

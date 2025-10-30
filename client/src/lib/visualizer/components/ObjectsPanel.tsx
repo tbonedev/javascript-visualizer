@@ -12,7 +12,7 @@ export function ObjectsPanel({ objects, hoveredObjectId }: ObjectsPanelProps) {
   if (objects.length === 0) {
     return (
       <div className='flex items-center justify-center h-full'>
-        <p className='text-zinc-500 text-sm'>No objects to display</p>
+        <p className='text-zinc-400 text-sm'>No objects to display</p>
       </div>
     );
   }
@@ -29,7 +29,7 @@ export function ObjectsPanel({ objects, hoveredObjectId }: ObjectsPanelProps) {
       {/* Data Structures Zone */}
       {dataStructures.length > 0 && (
         <div>
-          <h3 className='text-xs font-semibold text-zinc-500 uppercase mb-2'>
+          <h3 className='text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider'>
             Data Structures
           </h3>
           <div className='flex flex-wrap gap-3'>
@@ -47,7 +47,7 @@ export function ObjectsPanel({ objects, hoveredObjectId }: ObjectsPanelProps) {
       {/* Objects Zone */}
       {plainObjects.length > 0 && (
         <div>
-          <h3 className='text-xs font-semibold text-zinc-500 uppercase mb-2'>
+          <h3 className='text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider'>
             Objects
           </h3>
           <div className='flex flex-wrap gap-3'>
@@ -65,7 +65,7 @@ export function ObjectsPanel({ objects, hoveredObjectId }: ObjectsPanelProps) {
       {/* Functions Zone */}
       {functions.length > 0 && (
         <div>
-          <h3 className='text-xs font-semibold text-zinc-500 uppercase mb-2'>
+          <h3 className='text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider'>
             Functions
           </h3>
           <div className='flex flex-wrap gap-3'>

@@ -22,11 +22,11 @@ export function Variable({ variable, onHover }: VariableProps) {
 
   return (
     <div
-      className='flex items-center gap-2 py-1 px-2 rounded hover:bg-zinc-800/50 transition-colors'
+      className='flex items-center gap-2 py-1 px-2 rounded-lg hover:bg-white/[0.05] transition-all duration-150 cursor-pointer'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <span className='font-mono text-sm text-zinc-300'>{variable.name}</span>
+      <span className='font-mono text-sm text-zinc-200 font-medium'>{variable.name}</span>
       {variable.isPrimitive ? (
         <span className='font-mono text-sm text-zinc-400'>
           : {formatPrimitiveValue(variable.value)}
@@ -34,7 +34,7 @@ export function Variable({ variable, onHover }: VariableProps) {
       ) : (
         <>
           <span className='text-zinc-500'>────►</span>
-          <span className='font-mono text-xs text-blue-400'>
+          <span className='font-mono text-xs text-blue-400 font-semibold'>
             {variable.objectId}
           </span>
         </>

@@ -47,26 +47,26 @@ export default function LeftPanel({
 
   return (
     <div className='flex flex-col h-full p-2.5'>
-      <div className='h-[400px] rounded-3xl overflow-hidden border border-zinc-300 dark:border-zinc-800'>
+      <div className='h-[400px] rounded-3xl overflow-hidden border border-white/[0.08] bg-[#0f0f0f] shadow-lg'>
         <CodeEditor value={code} onChange={setCode} />
       </div>
       <div className='flex-1'></div>
 
       {error && (
-        <div className='mb-2 p-2 rounded-lg bg-red-500/10 border border-red-500 text-red-500 text-sm'>
+        <div className='mb-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm backdrop-blur-sm'>
           {error}
         </div>
       )}
 
       <div className='flex flex-col gap-2 mb-2'>
         <div className='flex items-center gap-2'>
-          <span className='text-green-500 text-3xl leading-none -translate-y-1'>
+          <span className='text-emerald-400 text-3xl leading-none -translate-y-1'>
             →
           </span>
           <span className='text-zinc-400 text-base'>Current line</span>
         </div>
         <div className='flex items-center gap-2'>
-          <span className='text-red-500 text-3xl leading-none -translate-y-1'>
+          <span className='text-rose-400 text-3xl leading-none -translate-y-1'>
             →
           </span>
           <span className='text-zinc-400 text-base'>Next line</span>
@@ -74,7 +74,7 @@ export default function LeftPanel({
       </div>
 
       <div className='flex items-center gap-3 mb-2.5'>
-        <span className='text-zinc-400 text-sm'>Step</span>
+        <span className='text-zinc-400 text-sm font-medium'>Step</span>
         <input
           type='range'
           min={minStep}
@@ -82,37 +82,37 @@ export default function LeftPanel({
           value={currentStep}
           onChange={(e) => setCurrentStep(parseInt(e.target.value))}
           disabled={!executionResult}
-          className='flex-1 h-[12px] bg-zinc-700 rounded-lg appearance-none cursor-pointer disabled:opacity-50
-  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-  [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-zinc-600 [&::-webkit-slider-thumb]:cursor-pointer'
+          className='flex-1 h-[8px] bg-white/5 rounded-full appearance-none cursor-pointer disabled:opacity-50 border border-white/[0.08]
+  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+  [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110'
         />
-        <span className='text-zinc-400 text-sm font-mono'>
+        <span className='text-zinc-400 text-sm font-mono tabular-nums'>
           {totalSteps > 0 ? `${currentStep + 1}/${totalSteps}` : '0/0'}
         </span>
       </div>
 
-      <div className='rounded-2xl bg-zinc-600 border border-zinc-600 flex items-center justify-between px-3 py-2'>
+      <div className='rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-between px-3 py-2 backdrop-blur-sm'>
         <button
           onClick={handlePrev}
           disabled={!executionResult || currentStep === minStep}
-          className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
-  transition-colors text-zinc-200 text-sm'
+          className='px-5 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.12] disabled:opacity-40
+  transition-all duration-200 text-zinc-200 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 disabled:hover:translate-y-0'
         >
           Prev
         </button>
         <button
           onClick={handleVisualize}
           disabled={isLoading}
-          className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
-  transition-colors text-zinc-200 text-sm'
+          className='px-6 py-2 rounded-xl bg-white hover:bg-gray-100 disabled:opacity-50
+  transition-all duration-200 text-black text-sm font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:hover:translate-y-0 border-0'
         >
           {isLoading ? 'Loading...' : 'Visualize'}
         </button>
         <button
           onClick={handleNext}
           disabled={!executionResult || currentStep >= totalSteps - 1}
-          className='px-4 py-1.5 rounded-lg bg-zinc-600 border border-zinc-500 hover:bg-zinc-500 disabled:opacity-50
-  transition-colors text-zinc-200 text-sm'
+          className='px-5 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.12] disabled:opacity-40
+  transition-all duration-200 text-zinc-200 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 disabled:hover:translate-y-0'
         >
           Next
         </button>

@@ -18,8 +18,8 @@ export function Visualizer({ executionStep }: VisualizerProps) {
     return (
       <div className='h-full flex items-center justify-center'>
         <div className='text-center'>
-          <p className='text-zinc-400 text-lg mb-2'>No execution data</p>
-          <p className='text-zinc-500 text-sm'>
+          <p className='text-zinc-300 text-lg mb-2 font-medium'>No execution data</p>
+          <p className='text-zinc-400 text-sm'>
             Click &quot;Visualize&quot; to execute code
           </p>
         </div>
@@ -33,7 +33,7 @@ export function Visualizer({ executionStep }: VisualizerProps) {
   return (
     <div className='h-full flex'>
       {/* Left: Frames Panel (35%) */}
-      <div className='w-[35%] border-r border-zinc-700'>
+      <div className='w-[35%] border-r border-white/[0.08]'>
         <FramesPanel
           frames={visualizationData.frames}
           onVariableHover={setHoveredObjectId}

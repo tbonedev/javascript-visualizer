@@ -11,7 +11,7 @@ export function FramesPanel({ frames, onVariableHover }: FramesPanelProps) {
   if (frames.length === 0) {
     return (
       <div className='flex items-center justify-center h-full'>
-        <p className='text-zinc-500 text-sm'>No frames to display</p>
+        <p className='text-zinc-400 text-sm'>No frames to display</p>
       </div>
     );
   }

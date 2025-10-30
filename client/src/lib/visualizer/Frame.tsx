@@ -35,10 +35,10 @@ export function Frame({ frame, onVariableHover }: FrameProps) {
   };
 
   return (
-    <div className='rounded-lg border border-zinc-700 bg-[#2d2d2d] overflow-hidden'>
+    <div className='rounded-xl border border-white/[0.08] bg-white/[0.03] overflow-hidden backdrop-blur-sm shadow-lg'>
       {/* Header */}
-      <div className='px-3 py-2 border-b border-zinc-700 bg-[#252525]'>
-        <h3 className={`text-sm font-semibold ${getHeaderColor()}`}>
+      <div className='px-3 py-2 border-b border-white/[0.08] bg-white/[0.02]'>
+        <h3 className={`text-sm font-bold ${getHeaderColor()}`}>
           {getFrameTitle()}
         </h3>
       </div>
@@ -54,7 +54,7 @@ export function Frame({ frame, onVariableHover }: FrameProps) {
             />
           ))
         ) : (
-          <div className='text-zinc-500 text-xs italic py-2 px-2'>(empty)</div>
+          <div className='text-zinc-400 text-xs italic py-2 px-2'>(empty)</div>
         )}
       </div>
     </div>
