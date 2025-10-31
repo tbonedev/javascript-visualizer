@@ -12,6 +12,7 @@ import {
   ValueSerializer,
   ArraySerializer,
   ObjectSerializer,
+  AsyncHooksService,
 } from './services';
 import { UserFunctionParserService } from './services/step-collector/user-function-parser.service';
 
@@ -40,6 +41,9 @@ import { UserFunctionParserService } from './services/step-collector/user-functi
     ValueSerializer,
     ArraySerializer,
     ObjectSerializer,
+
+    // Async
+    AsyncHooksService,
   ],
   exports: [ExecutorService],
 })

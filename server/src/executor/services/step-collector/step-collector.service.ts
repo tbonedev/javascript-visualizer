@@ -5,7 +5,7 @@ import { V8InspectorService } from '../v8-inspector.service';
 import { ScopeExtractorService } from './scope-extractor.service';
 import { VariableSerializerService } from './variable-serializer';
 import { StackFrame } from '../../interfaces/stack-frame.interface';
-
+import { AsyncHooksService } from '../async-hooks.service';
 @Injectable()
 export class StepCollectorService implements IStepCollectorService {
   private steps: ExecutionStep[] = [];
@@ -17,6 +17,7 @@ export class StepCollectorService implements IStepCollectorService {
     private readonly v8Inspector: V8InspectorService,
     private readonly scopeExtractor: ScopeExtractorService,
     private readonly variableSerializer: VariableSerializerService,
+    private readonly asyncHooks: AsyncHooksService,
   ) {}
 
   /**
@@ -102,6 +103,7 @@ export class StepCollectorService implements IStepCollectorService {
       code: codeLine.trim(),
       scope,
       callStack: this.buildCallStack(params.callFrames),
+      eventLoop: this.asyncHooks.getEventLoopState(),
     };
 
     this.steps.push(step);
@@ -155,5 +157,6 @@ export class StepCollectorService implements IStepCollectorService {
     this.stepCounter = 0;
     this.processingQueue = Promise.resolve(); // Сбрасываем очередь
     this.variableSerializer.reset(); // ← Сбрасываем circular guard!
+    this.asyncHooks.reset();
   }
 }

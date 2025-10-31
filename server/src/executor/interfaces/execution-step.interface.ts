@@ -1,6 +1,6 @@
 import { StackFrame } from './stack-frame.interface';
 import { Scope } from './scope.interface';
-
+import { EventLoopState } from './async-event.interface';
 export interface ExecutionStep {
   step: number;
   line: number;
@@ -9,4 +9,5 @@ export interface ExecutionStep {
 
   callStack?: StackFrame[];
   // heap?: HeapObject[];
+  eventLoop?: EventLoopState;
 }

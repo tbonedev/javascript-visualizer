@@ -1,8 +1,3 @@
-/**
- * Safe VM context with whitelisted global objects
- * Provides a secure sandbox for code execution
- */
-
 export const createSafeContext = (): Record<string, unknown> => {
   return {
     // Console for output
@@ -51,6 +46,15 @@ export const createSafeContext = (): Record<string, unknown> => {
 
     // Promise for async
     Promise: Promise,
+
+    // Timers для async
+    setTimeout: setTimeout,
+    setInterval: setInterval,
+    clearTimeout: clearTimeout,
+    clearInterval: clearInterval,
+
+    // Microtask
+    queueMicrotask: queueMicrotask,
 
     // Special values
     undefined: undefined,

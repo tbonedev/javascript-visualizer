@@ -3,6 +3,7 @@ import vm from 'vm';
 import inspector from 'inspector';
 import { V8InspectorService } from './v8-inspector.service';
 import { StepCollectorService } from './step-collector/step-collector.service';
+import { AsyncHooksService } from './async-hooks.service';
 import { createSafeContext } from './vm-context';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class CodeRunnerService {
   constructor(
     private readonly v8Inspector: V8InspectorService,
     private readonly stepCollector: StepCollectorService,
+    private readonly asyncHooks: AsyncHooksService,
   ) {}
 
   async runWithBreakpoints(code: string): Promise<void> {
@@ -40,6 +42,7 @@ export class CodeRunnerService {
       );
 
       try {
+        this.asyncHooks.enable();
         // Активируем breakpoints
         await this.v8Inspector.post('Debugger.setBreakpointsActive', {
           active: true,
@@ -87,7 +90,9 @@ export class CodeRunnerService {
             );
             await Promise.all(pausePromises);
             clearTimeout(timeout);
-            console.log('✅ Code execution completed (breakpoints + stepOver mode)');
+            console.log(
+              '✅ Code execution completed (breakpoints + stepOver mode)',
+            );
             resolve();
           } catch (error) {
             clearTimeout(timeout);
@@ -96,7 +101,11 @@ export class CodeRunnerService {
         });
       } catch (error) {
         clearTimeout(timeout);
+        this.asyncHooks.disable();
+
         reject(error instanceof Error ? error : new Error(String(error)));
+      } finally {
+        this.asyncHooks.disable();
       }
     });
   }
@@ -138,27 +147,31 @@ export class CodeRunnerService {
         console.log('✅ Code execution started (step-by-step mode)');
 
         // Ставим паузу перед следующей строкой кода
-        this.v8Inspector.post('Debugger.setPauseOnNextStatement', {}).then(() => {
-          script.runInContext(context, {
-            timeout: this.TIMEOUT,
-          });
+        this.v8Inspector
+          .post('Debugger.setPauseOnNextStatement', {})
+          .then(() => {
+            script.runInContext(context, {
+              timeout: this.TIMEOUT,
+            });
 
-          // ЖДЁМ завершения ВСЕХ handlePause перед resolve
-          setImmediate(async () => {
-            try {
-              console.log(
-                `⏳ Waiting for ${pausePromises.length} pause handlers to complete...`,
-              );
-              await Promise.all(pausePromises);
-              clearTimeout(timeout);
-              console.log('✅ Code execution completed (step-by-step mode)');
-              resolve();
-            } catch (error) {
-              clearTimeout(timeout);
-              reject(error instanceof Error ? error : new Error(String(error)));
-            }
+            // ЖДЁМ завершения ВСЕХ handlePause перед resolve
+            setImmediate(async () => {
+              try {
+                console.log(
+                  `⏳ Waiting for ${pausePromises.length} pause handlers to complete...`,
+                );
+                await Promise.all(pausePromises);
+                clearTimeout(timeout);
+                console.log('✅ Code execution completed (step-by-step mode)');
+                resolve();
+              } catch (error) {
+                clearTimeout(timeout);
+                reject(
+                  error instanceof Error ? error : new Error(String(error)),
+                );
+              }
+            });
           });
-        });
       } catch (error) {
         clearTimeout(timeout);
         reject(error instanceof Error ? error : new Error(String(error)));
@@ -220,9 +233,7 @@ export class CodeRunnerService {
                 breakpointCount++;
               }
 
-              console.log(
-                `✅ Set ${breakpointCount} breakpoints via scriptId`,
-              );
+              console.log(`✅ Set ${breakpointCount} breakpoints via scriptId`);
             } catch (error) {
               console.error(
                 '❌ Failed to set breakpoints via scriptId:',
@@ -241,9 +252,7 @@ export class CodeRunnerService {
             .handlePause(message.params, codeLines)
             .catch((error) => {
               clearTimeout(timeout);
-              reject(
-                error instanceof Error ? error : new Error(String(error)),
-              );
+              reject(error instanceof Error ? error : new Error(String(error)));
             });
 
           pausePromises.push(pausePromise);
