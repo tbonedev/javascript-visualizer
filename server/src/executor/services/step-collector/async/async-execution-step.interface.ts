@@ -1,5 +1,5 @@
-import { ExecutionStep } from './execution-step.interface';
-import { StackFrame } from './stack-frame.interface';
+import { ExecutionStep } from '../sync/execution-step.interface';
+import { StackFrame } from '../shared/stack-frame.interface';
 
 /**
  * Type of async operation

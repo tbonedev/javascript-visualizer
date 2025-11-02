@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { V8InspectorService } from '../../../v8-inspector/v8-inspector.service';
+import { V8InspectorService } from '../../../../v8-inspector/v8-inspector.service';
 import { CircularGuard, PropertyFilter } from '../helpers';
 
 @Injectable()

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ExecutionStep } from './interfaces/execution-step.interface';
+import { ExecutionStep } from './executor.interfaces';
 import { V8InspectorService } from './services';
 import { CodeRunnerService } from './services/code-runner/code-runner.service';
-import { StepCollectorService } from './services/step-collector/step-collector.service';
-import { AsyncStepCollectorService } from './services/step-collector/async-step-collector.service';
-import { UserFunctionParserService } from './services/step-collector/user-function-parser.service';
+import { StepCollectorService } from './services/step-collector/sync/step-collector.service';
+import { AsyncStepCollectorService } from './services/step-collector/async/async-step-collector.service';
+import { UserFunctionParserService } from './services/step-collector/shared/user-function-parser.service';
 
 @Injectable()
 export class ExecutorService {

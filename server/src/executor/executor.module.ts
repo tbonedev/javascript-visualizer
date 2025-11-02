@@ -14,8 +14,8 @@ import {
   ObjectSerializer,
   AsyncHooksService,
 } from './services';
-import { UserFunctionParserService } from './services/step-collector/user-function-parser.service';
-import { AsyncStepCollectorService } from './services/step-collector/async-step-collector.service';
+import { UserFunctionParserService } from './services/step-collector/shared/user-function-parser.service';
+import { AsyncStepCollectorService } from './services/step-collector/async/async-step-collector.service';
 import { MicrotaskHandler } from './services/async-hooks/handlers/microtask.handler';
 import { PromiseHandler } from './services/async-hooks/handlers/promise.handler';
 import { TimeoutHandler } from './services/async-hooks/handlers/timeout.handler';

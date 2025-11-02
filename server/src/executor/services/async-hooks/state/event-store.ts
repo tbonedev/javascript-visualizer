@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AsyncEvent } from '../../../interfaces/async-event.interface';
+import { AsyncEvent } from '../async-event.interface';
 
 /**
  * Stores async events for debugging and analysis

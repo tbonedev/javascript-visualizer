@@ -4,11 +4,11 @@ import {
   AsyncExecutionStep,
   AsyncOperationType,
   AsyncOperationInfo,
-} from '../../interfaces';
-import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
-import { ScopeExtractorService } from './scope-extractor.service';
-import { StackFrame } from '../../interfaces/stack-frame.interface';
-import { AsyncHooksService } from '../async-hooks/async-hooks.service';
+} from './async-execution-step.interface';
+import { V8InspectorService } from '../../v8-inspector/v8-inspector.service';
+import { ScopeExtractorService } from '../shared/scope-extractor.service';
+import { StackFrame } from '../shared/stack-frame.interface';
+import { AsyncHooksService } from '../../async-hooks/async-hooks.service';
 
 /**
  * Async Step Collector Service

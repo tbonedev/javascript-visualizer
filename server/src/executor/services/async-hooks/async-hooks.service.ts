@@ -3,7 +3,7 @@ import * as asyncHooks from 'async_hooks';
 import {
   EventLoopState,
   AsyncEvent,
-} from '../../interfaces/async-event.interface';
+} from './async-event.interface';
 import { EventLoopStateManager } from './state/event-loop-state.manager';
 import { EventStore } from './state/event-store';
 import { PromiseHandler } from './handlers/promise.handler';

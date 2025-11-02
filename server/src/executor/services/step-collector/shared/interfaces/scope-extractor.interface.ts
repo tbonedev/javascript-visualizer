@@ -1,5 +1,5 @@
 import inspector from 'inspector';
-import { Scope } from '../../../interfaces';
+import { Scope } from '../scope.interface';
 
 export interface IScopeExtractorService {
   /**

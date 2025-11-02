@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import inspector from 'inspector';
-import { Scope } from '../../interfaces';
+import { Scope } from './scope.interface';
 import { IScopeExtractorService } from './interfaces';
 import { VariableSerializerService } from './variable-serializer';
 import { UserFunctionParserService } from './user-function-parser.service';

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IBreakpointService } from '../../interfaces';
+import { IBreakpointService } from './breakpoint.interface';
 import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
 
 @Injectable()
