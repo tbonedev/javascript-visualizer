@@ -5,10 +5,10 @@ import {
   AsyncOperationType,
   AsyncOperationInfo,
 } from '../../interfaces';
-import { V8InspectorService } from '../v8-inspector.service';
+import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
 import { ScopeExtractorService } from './scope-extractor.service';
 import { StackFrame } from '../../interfaces/stack-frame.interface';
-import { AsyncHooksService } from '../async-hooks.service';
+import { AsyncHooksService } from '../async-hooks/async-hooks.service';
 
 /**
  * Async Step Collector Service

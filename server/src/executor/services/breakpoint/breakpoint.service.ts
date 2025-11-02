@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { IBreakpointService } from '../interfaces';
-import { V8InspectorService } from './v8-inspector.service';
+import { IBreakpointService } from '../../interfaces';
+import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
 
 @Injectable()
 export class BreakpointService implements IBreakpointService {

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import inspector from 'inspector';
 import { ExecutionStep, IStepCollectorService } from '../../interfaces';
-import { V8InspectorService } from '../v8-inspector.service';
+import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
 import { ScopeExtractorService } from './scope-extractor.service';
 import { VariableSerializerService } from './variable-serializer';
 import { StackFrame } from '../../interfaces/stack-frame.interface';
-import { AsyncHooksService } from '../async-hooks.service';
+import { AsyncHooksService } from '../async-hooks/async-hooks.service';
 @Injectable()
 export class StepCollectorService implements IStepCollectorService {
   private steps: ExecutionStep[] = [];

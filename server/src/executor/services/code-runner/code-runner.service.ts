@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import vm from 'vm';
 import inspector from 'inspector';
-import { V8InspectorService } from './v8-inspector.service';
-import { StepCollectorService } from './step-collector/step-collector.service';
-import { AsyncStepCollectorService } from './step-collector/async-step-collector.service';
-import { AsyncHooksService } from './async-hooks.service';
-import { PromiseHandler } from './async-hooks/handlers/promise.handler';
+import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
+import { StepCollectorService } from '../step-collector/step-collector.service';
+import { AsyncStepCollectorService } from '../step-collector/async-step-collector.service';
+import { AsyncHooksService } from '../async-hooks/async-hooks.service';
+import { PromiseHandler } from '../async-hooks/handlers/promise.handler';
 import { createSafeContext } from './vm-context';
 
 @Injectable()

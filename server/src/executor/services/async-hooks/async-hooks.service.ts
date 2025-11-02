@@ -3,13 +3,13 @@ import * as asyncHooks from 'async_hooks';
 import {
   EventLoopState,
   AsyncEvent,
-} from '../interfaces/async-event.interface';
-import { EventLoopStateManager } from './async-hooks/state/event-loop-state.manager';
-import { EventStore } from './async-hooks/state/event-store';
-import { PromiseHandler } from './async-hooks/handlers/promise.handler';
-import { TimeoutHandler } from './async-hooks/handlers/timeout.handler';
-import { MicrotaskHandler } from './async-hooks/handlers/microtask.handler';
-import { IGNORED_ASYNC_TYPES } from './async-hooks/constants/ignored-async-types';
+} from '../../interfaces/async-event.interface';
+import { EventLoopStateManager } from './state/event-loop-state.manager';
+import { EventStore } from './state/event-store';
+import { PromiseHandler } from './handlers/promise.handler';
+import { TimeoutHandler } from './handlers/timeout.handler';
+import { MicrotaskHandler } from './handlers/microtask.handler';
+import { IGNORED_ASYNC_TYPES } from './constants/ignored-async-types';
 
 /**
  * Main service for tracking async operations using Node.js async_hooks API
