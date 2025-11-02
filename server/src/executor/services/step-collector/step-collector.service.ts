@@ -43,6 +43,17 @@ export class StepCollectorService implements IStepCollectorService {
     params: inspector.Debugger.PausedEventDataType,
     codeLines: string[],
   ): Promise<void> {
+    // DEBUG: Log async stack trace info
+    // console.log('🔍 Pause event:', {
+    //   reason: params.reason,
+    //   hasAsyncStackTrace: !!params.asyncStackTrace,
+    //   asyncStackTraceId: params.asyncStackTraceId,
+    // });
+
+    // if (params.asyncStackTrace) {
+    //   console.log('📚 Async Stack Trace:', JSON.stringify(params.asyncStackTrace, null, 2));
+    // }
+
     // Проверка наличия call frames
     if (!params.callFrames || params.callFrames.length === 0) {
       try {

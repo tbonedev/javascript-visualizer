@@ -19,7 +19,17 @@ export class V8InspectorService implements IV8InspectorService {
     await this.post('Debugger.enable');
     await this.post('Runtime.enable');
 
-    console.log('✅ V8 Inspector connected');
+    // Enable async call stack tracking (depth 32 = max depth of async stack traces)
+    await this.post('Debugger.setAsyncCallStackDepth', { maxDepth: 32 });
+
+    console.log('✅ V8 Inspector connected (async stack traces enabled)');
+  }
+
+  /**
+   * Get current inspector session
+   */
+  getSession(): inspector.Session | null {
+    return this.session;
   }
 
   /**
@@ -62,12 +72,5 @@ export class V8InspectorService implements IV8InspectorService {
     }
 
     this.session.on(event, handler);
-  }
-
-  /**
-   * Get inspector session
-   */
-  getSession(): inspector.Session | null {
-    return this.session;
   }
 }

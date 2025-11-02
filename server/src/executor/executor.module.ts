@@ -15,6 +15,12 @@ import {
   AsyncHooksService,
 } from './services';
 import { UserFunctionParserService } from './services/step-collector/user-function-parser.service';
+import { AsyncStepCollectorService } from './services/step-collector/async-step-collector.service';
+import { MicrotaskHandler } from './services/async-hooks/handlers/microtask.handler';
+import { PromiseHandler } from './services/async-hooks/handlers/promise.handler';
+import { TimeoutHandler } from './services/async-hooks/handlers/timeout.handler';
+import { EventLoopStateManager } from './services/async-hooks/state/event-loop-state.manager';
+import { EventStore } from './services/async-hooks/state/event-store';
 
 @Module({
   providers: [
@@ -27,6 +33,7 @@ import { UserFunctionParserService } from './services/step-collector/user-functi
 
     // Step collector
     StepCollectorService,
+    AsyncStepCollectorService,
     ScopeExtractorService,
     UserFunctionParserService,
 
@@ -44,6 +51,14 @@ import { UserFunctionParserService } from './services/step-collector/user-functi
 
     // Async
     AsyncHooksService,
+    // Async Hooks - State Management
+    EventLoopStateManager,
+    EventStore,
+
+    // Async Hooks - Handlers
+    PromiseHandler,
+    TimeoutHandler,
+    MicrotaskHandler,
   ],
   exports: [ExecutorService],
 })

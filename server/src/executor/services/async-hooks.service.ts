@@ -1,27 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AsyncEvent,
-  PromiseItem,
-  TimeoutItem,
-  MicrotaskItem,
-  EventLoopState,
-} from '../interfaces/async-event.interface';
 import * as asyncHooks from 'async_hooks';
+import {
+  EventLoopState,
+  AsyncEvent,
+} from '../interfaces/async-event.interface';
+import { EventLoopStateManager } from './async-hooks/state/event-loop-state.manager';
+import { EventStore } from './async-hooks/state/event-store';
+import { PromiseHandler } from './async-hooks/handlers/promise.handler';
+import { TimeoutHandler } from './async-hooks/handlers/timeout.handler';
+import { MicrotaskHandler } from './async-hooks/handlers/microtask.handler';
+import { IGNORED_ASYNC_TYPES } from './async-hooks/constants/ignored-async-types';
+
+/**
+ * Main service for tracking async operations using Node.js async_hooks API
+ */
 @Injectable()
 export class AsyncHooksService {
   private hook: asyncHooks.AsyncHook | null = null;
-  private events: AsyncEvent[] = [];
 
-  // Хранилище async ресурсов
-  private asyncIdToResource = new Map<number, any>();
-  private promises = new Map<number, PromiseItem>();
-  private timeouts = new Map<number, TimeoutItem>();
-  private microtasks = new Map<number, MicrotaskItem>();
+  constructor(
+    private readonly stateManager: EventLoopStateManager,
+    private readonly eventStore: EventStore,
+    private readonly promiseHandler: PromiseHandler,
+    private readonly timeoutHandler: TimeoutHandler,
+    private readonly microtaskHandler: MicrotaskHandler,
+  ) {}
 
-  // queues
-  private microtaskQueue: MicrotaskItem[] = [];
-  private taskQueue: TimeoutItem[] = [];
-
+  /**
+   * Enable async hooks tracking
+   */
   enable(): void {
     if (this.hook) {
       console.warn('⚠️ Async hooks already enabled');
@@ -40,6 +47,9 @@ export class AsyncHooksService {
     console.log('✅ Async hooks enabled');
   }
 
+  /**
+   * Disable async hooks tracking
+   */
   disable(): void {
     if (this.hook) {
       this.hook.disable();
@@ -47,200 +57,125 @@ export class AsyncHooksService {
       console.log('✅ Async hooks disabled');
     }
   }
+
+  /**
+   * Reset all tracking state
+   */
   reset(): void {
-    this.events = [];
-    this.asyncIdToResource.clear();
-    this.promises.clear();
-    this.timeouts.clear();
-    this.microtasks.clear();
-    this.microtaskQueue = [];
-    this.taskQueue = [];
+    this.stateManager.reset();
+    this.eventStore.clear();
+    this.promiseHandler.reset();
+    this.timeoutHandler.reset();
+    this.microtaskHandler.reset();
   }
 
+  /**
+   * Get current Event Loop state
+   */
   getEventLoopState(): EventLoopState {
-    return {
-      webAPIs: {
-        promises: Array.from(this.promises.values()),
-        timeouts: Array.from(this.timeouts.values()),
-      },
-      microtaskQueue: [...this.microtaskQueue],
-      taskQueue: [...this.taskQueue],
-    };
+    return this.stateManager.getState();
   }
+
+  /**
+   * Get all recorded events
+   */
   getEvents(): AsyncEvent[] {
-    return [...this.events];
+    return this.eventStore.getAll();
   }
-  // ========== Async Hooks callbacks ==========
+
+  // ========== Async Hooks Callbacks ==========
+
+  /**
+   * Called when async resource is created
+   */
   private onInit(
     asyncId: number,
     type: string,
     triggerAsyncId: number,
     resource: any,
   ): void {
-    this.asyncIdToResource.set(asyncId, resource);
+    // Filter out system/internal async resources
+    if (IGNORED_ASYNC_TYPES.includes(type as any)) {
+      return;
+    }
 
+    // Store resource for later inspection
+    this.stateManager.setResource(asyncId, resource);
+
+    // Delegate to specific handlers
     if (type === 'PROMISE') {
-      const promiseItem: PromiseItem = {
-        id: asyncId,
-        parentId: triggerAsyncId,
-        status: 'pending',
-      };
-      this.promises.set(asyncId, promiseItem);
-
-      this.addEvent({
-        type: 'InitPromise',
-        asyncId,
-        triggerAsyncId,
-        timestamp: Date.now(),
-      });
-    }
-    if (type === 'Timeout') {
-      const callbackName = resource._onTimeout?.name || 'anonymous';
-      const timeoutItem: TimeoutItem = {
-        id: asyncId,
-        callbackName,
-        createdAt: Date.now(),
-      };
-      this.timeouts.set(asyncId, timeoutItem);
-
-      this.addEvent({
-        type: 'InitTimeout',
-        asyncId,
-        callbackName,
-        timestamp: Date.now(),
-      });
-    }
-
-    // Обрабатываем Microtask (queueMicrotask)
-    if (type === 'Microtask') {
-      const microtaskItem: MicrotaskItem = {
-        id: asyncId,
-        parentId: triggerAsyncId,
-      };
-      this.microtasks.set(asyncId, microtaskItem);
-
-      this.addEvent({
-        type: 'InitMicrotask',
-        asyncId,
-        triggerAsyncId,
-        timestamp: Date.now(),
-      });
-    }
-  }
-  private onBefore(asyncId: number): void {
-    const resource = this.asyncIdToResource.get(asyncId);
-    if (!resource) return;
-    const resourceName = resource.constructor?.name;
-
-    if (resourceName === 'PromiseWrap') {
-      this.addEvent({
-        type: 'BeforePromise',
-        asyncId,
-        timestamp: Date.now(),
-      });
-      this.microtaskQueue = this.microtaskQueue.filter((m) => m.id !== asyncId);
-    }
-    if (resourceName === 'Timeout') {
-      this.addEvent({
-        type: 'BeforeTimeout',
-        asyncId,
-        timestamp: Date.now(),
-      });
-      this.taskQueue = this.taskQueue.filter((t) => t.id !== asyncId);
-    }
-
-    // Microtask callback начал выполняться
-    if (resourceName === 'AsyncResource') {
-      this.addEvent({
-        type: 'BeforeMicrotask',
-        asyncId,
-        timestamp: Date.now(),
-      });
-
-      this.microtaskQueue = this.microtaskQueue.filter((m) => m.id !== asyncId);
+      this.promiseHandler.onInit(asyncId, triggerAsyncId);
+    } else if (type === 'Timeout') {
+      this.timeoutHandler.onInit(asyncId, resource);
+    } else if (type === 'Microtask') {
+      this.microtaskHandler.onInit(asyncId, triggerAsyncId);
     }
   }
 
   /**
-   * Вызывается ПОСЛЕ выполнения async callback
+   * Called before async callback execution
+   */
+  private onBefore(asyncId: number): void {
+    const resource = this.stateManager.getResource(asyncId);
+    if (!resource) return;
+
+    const resourceName = resource.constructor?.name;
+
+    // Delegate to specific handlers based on resource type
+    if (resourceName === 'PromiseWrap') {
+      this.promiseHandler.onBefore(asyncId);
+    } else if (resourceName === 'Timeout') {
+      this.timeoutHandler.onBefore(asyncId);
+    } else if (resourceName === 'AsyncResource') {
+      this.microtaskHandler.onBefore(asyncId);
+    }
+  }
+
+  /**
+   * Called after async callback execution
    */
   private onAfter(asyncId: number): void {
-    const resource = this.asyncIdToResource.get(asyncId);
+    const resource = this.stateManager.getResource(asyncId);
     if (!resource) return;
 
     const resourceName = resource.constructor?.name;
 
+    // Delegate to specific handlers based on resource type
     if (resourceName === 'PromiseWrap') {
-      this.addEvent({
-        type: 'AfterPromise',
-        asyncId,
-        timestamp: Date.now(),
-      });
-    }
-
-    if (resourceName === 'Timeout') {
-      this.addEvent({
-        type: 'AfterTimeout',
-        asyncId,
-        timestamp: Date.now(),
-      });
-    }
-
-    if (resourceName === 'AsyncResource') {
-      this.addEvent({
-        type: 'AfterMicrotask',
-        asyncId,
-        timestamp: Date.now(),
-      });
+      this.promiseHandler.onAfter(asyncId);
+    } else if (resourceName === 'Timeout') {
+      this.timeoutHandler.onAfter(asyncId);
+    } else if (resourceName === 'AsyncResource') {
+      this.microtaskHandler.onAfter(asyncId);
     }
   }
 
   /**
-   * Вызывается когда async ресурс уничтожается
+   * Called when async resource is destroyed
    */
   private onDestroy(asyncId: number): void {
-    // Удаляем из хранилища
-    this.asyncIdToResource.delete(asyncId);
-    this.promises.delete(asyncId);
-    this.timeouts.delete(asyncId);
-    this.microtasks.delete(asyncId);
+    const resource = this.stateManager.getResource(asyncId);
+    if (!resource) return;
+
+    const resourceName = resource.constructor?.name;
+
+    // Delegate to specific handlers based on resource type
+    if (resourceName === 'PromiseWrap') {
+      this.promiseHandler.onDestroy(asyncId);
+    } else if (resourceName === 'Timeout') {
+      this.timeoutHandler.onDestroy(asyncId);
+    } else if (resourceName === 'AsyncResource') {
+      this.microtaskHandler.onDestroy(asyncId);
+    }
+
+    // Clean up resource storage
+    this.stateManager.deleteResource(asyncId);
   }
 
   /**
-   * Вызывается когда Promise resolve-ится
+   * Called when Promise is resolved
    */
   private onPromiseResolve(asyncId: number): void {
-    const promise = this.promises.get(asyncId);
-    if (promise) {
-      promise.status = 'resolved';
-
-      this.addEvent({
-        type: 'ResolvePromise',
-        asyncId,
-        timestamp: Date.now(),
-      });
-
-      // Promise resolved → callback идет в microtask queue
-      // Находим дочерний Promise (который создан .then())
-      const childPromise = Array.from(this.promises.values()).find(
-        (p) => p.parentId === asyncId,
-      );
-
-      if (childPromise) {
-        const microtask: MicrotaskItem = {
-          id: childPromise.id,
-          parentId: asyncId,
-          callbackName: childPromise.callbackName,
-        };
-        this.microtaskQueue.push(microtask);
-      }
-    }
-  }
-
-  /**
-   * Добавить событие в список
-   */
-  private addEvent(event: AsyncEvent): void {
-    this.events.push(event);
+    this.promiseHandler.onResolve(asyncId);
   }
 }
