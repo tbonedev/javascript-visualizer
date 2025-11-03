@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import inspector from 'inspector';
-import { IV8InspectorService, V8EventHandler } from './v8-inspector.interface';
+import { IV8InspectorService, V8EventHandler } from './interfaces/v8-inspector.interface';
 
 /**
  * Service for working with V8 Inspector Protocol

@@ -13,6 +13,6 @@ export * from './services/step-collector/shared/interfaces/stack-frame.interface
 export * from './services/step-collector/shared/interfaces';
 
 // Other services
-export * from './services/v8-inspector/v8-inspector.interface';
-export * from './services/breakpoint-manager/breakpoint.interface';
-export * from './services/event-loop-tracker/event-loop-event.interface';
+export * from './services/v8-inspector/interfaces/v8-inspector.interface';
+export * from './services/breakpoint-manager/interfaces/breakpoint.interface';
+export * from './services/event-loop-tracker/interfaces/event-loop-event.interface';
