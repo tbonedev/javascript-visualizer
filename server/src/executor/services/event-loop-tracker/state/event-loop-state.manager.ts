@@ -25,12 +25,23 @@ export class EventLoopStateManager {
    * Get current Event Loop state snapshot
    */
   getState(): EventLoopState {
+    // Filter out internal/system promises (those without closure/source)
+    // Only show user code promises that have been tracked
+    const userPromises = Array.from(this.promises.values()).filter(
+      (p) => p.closure || p.source,
+    );
+
+    // Filter out internal/system microtasks too
+    const userMicrotasks = this.microtaskQueue.filter(
+      (m) => m.closure || m.source,
+    );
+
     return {
       webAPIs: {
-        promises: Array.from(this.promises.values()),
+        promises: userPromises,
         timeouts: Array.from(this.timeouts.values()),
       },
-      microtaskQueue: [...this.microtaskQueue],
+      microtaskQueue: userMicrotasks,
       taskQueue: [...this.taskQueue],
     };
   }
