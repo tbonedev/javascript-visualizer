@@ -4,7 +4,7 @@ import {
   PromiseItem,
   TimeoutItem,
   MicrotaskItem,
-} from '../async-event.interface';
+} from '../event-loop-event.interface';
 
 /**
  * Manages Event Loop state: Web APIs, queues, and async resources

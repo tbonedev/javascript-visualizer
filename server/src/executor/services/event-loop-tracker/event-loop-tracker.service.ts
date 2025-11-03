@@ -3,7 +3,7 @@ import * as asyncHooks from 'async_hooks';
 import {
   EventLoopState,
   AsyncEvent,
-} from './async-event.interface';
+} from './event-loop-event.interface';
 import { EventLoopStateManager } from './state/event-loop-state.manager';
 import { EventStore } from './state/event-store';
 import { PromiseHandler } from './handlers/promise.handler';
@@ -12,10 +12,10 @@ import { MicrotaskHandler } from './handlers/microtask.handler';
 import { IGNORED_ASYNC_TYPES } from './constants/ignored-async-types';
 
 /**
- * Main service for tracking async operations using Node.js async_hooks API
+ * Service for tracking Event Loop state and async operations using Node.js async_hooks API
  */
 @Injectable()
-export class AsyncHooksService {
+export class EventLoopTrackerService {
   private hook: asyncHooks.AsyncHook | null = null;
 
   constructor(

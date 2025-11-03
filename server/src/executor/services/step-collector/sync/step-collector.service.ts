@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import inspector from 'inspector';
-import { ExecutionStep } from './execution-step.interface';
-import { IStepCollectorService } from './step-collector.interface';
+import { ExecutionStep } from './interfaces/execution-step.interface';
+import { IStepCollectorService } from './interfaces/step-collector.interface';
 import { V8InspectorService } from '../../v8-inspector/v8-inspector.service';
 import { ScopeExtractorService } from '../shared/scope-extractor.service';
 import { VariableSerializerService } from '../shared/variable-serializer';
-import { StackFrame } from '../shared/stack-frame.interface';
-import { AsyncHooksService } from '../../async-hooks/async-hooks.service';
+import { StackFrame } from '../shared/interfaces/stack-frame.interface';
+import { EventLoopTrackerService } from '../../event-loop-tracker/event-loop-tracker.service';
 @Injectable()
 export class StepCollectorService implements IStepCollectorService {
   private steps: ExecutionStep[] = [];
@@ -18,7 +18,7 @@ export class StepCollectorService implements IStepCollectorService {
     private readonly v8Inspector: V8InspectorService,
     private readonly scopeExtractor: ScopeExtractorService,
     private readonly variableSerializer: VariableSerializerService,
-    private readonly asyncHooks: AsyncHooksService,
+    private readonly eventLoopTracker: EventLoopTrackerService,
   ) {}
 
   /**
@@ -115,7 +115,7 @@ export class StepCollectorService implements IStepCollectorService {
       code: codeLine.trim(),
       scope,
       callStack: this.buildCallStack(params.callFrames),
-      eventLoop: this.asyncHooks.getEventLoopState(),
+      eventLoop: this.eventLoopTracker.getEventLoopState(),
     };
 
     this.steps.push(step);
@@ -169,6 +169,6 @@ export class StepCollectorService implements IStepCollectorService {
     this.stepCounter = 0;
     this.processingQueue = Promise.resolve(); // Сбрасываем очередь
     this.variableSerializer.reset(); // ← Сбрасываем circular guard!
-    this.asyncHooks.reset();
+    this.eventLoopTracker.reset();
   }
 }

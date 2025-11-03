@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ExecutionStep } from './executor.interfaces';
 import { V8InspectorService } from './services';
-import { CodeRunnerService } from './services/code-runner/code-runner.service';
+import { RuntimeService } from './services/runtime/runtime.service';
 import { StepCollectorService } from './services/step-collector/sync/step-collector.service';
 import { AsyncStepCollectorService } from './services/step-collector/async/async-step-collector.service';
 import { UserFunctionParserService } from './services/step-collector/shared/user-function-parser.service';
@@ -12,7 +12,7 @@ export class ExecutorService {
     private readonly v8Inspector: V8InspectorService,
     private readonly stepCollector: StepCollectorService,
     private readonly asyncStepCollector: AsyncStepCollectorService,
-    private readonly codeRunner: CodeRunnerService,
+    private readonly runtime: RuntimeService,
     private readonly userFunctionParser: UserFunctionParserService,
   ) {}
 
@@ -27,7 +27,7 @@ export class ExecutorService {
       await this.v8Inspector.connect();
 
       // Используем runWithBreakpoints - устанавливаем breakpoints и используем stepOver
-      await this.codeRunner.runWithBreakpoints(code);
+      await this.runtime.runWithBreakpoints(code);
 
       // Об'єднуємо sync і async steps
       const syncSteps = this.stepCollector.getSteps();

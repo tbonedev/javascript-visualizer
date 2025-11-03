@@ -4,12 +4,12 @@ import inspector from 'inspector';
 import { V8InspectorService } from '../v8-inspector/v8-inspector.service';
 import { StepCollectorService } from '../step-collector/sync/step-collector.service';
 import { AsyncStepCollectorService } from '../step-collector/async/async-step-collector.service';
-import { AsyncHooksService } from '../async-hooks/async-hooks.service';
-import { PromiseHandler } from '../async-hooks/handlers/promise.handler';
+import { EventLoopTrackerService } from '../event-loop-tracker/event-loop-tracker.service';
+import { PromiseHandler } from '../event-loop-tracker/handlers/promise.handler';
 import { createSafeContext } from './vm-context';
 
 @Injectable()
-export class CodeRunnerService {
+export class RuntimeService {
   private readonly VIRTUAL_FILENAME = 'virtual://code.js';
   private readonly TIMEOUT = 150000;
 
@@ -20,7 +20,7 @@ export class CodeRunnerService {
     private readonly v8Inspector: V8InspectorService,
     private readonly stepCollector: StepCollectorService,
     private readonly asyncStepCollector: AsyncStepCollectorService,
-    private readonly asyncHooks: AsyncHooksService,
+    private readonly eventLoopTracker: EventLoopTrackerService,
     private readonly promiseHandler: PromiseHandler,
   ) {}
 
@@ -66,7 +66,7 @@ export class CodeRunnerService {
       );
 
       try {
-        this.asyncHooks.enable();
+        this.eventLoopTracker.enable();
         this.isExecutingAsync = false; // Починаємо з sync коду
 
         // Активируем breakpoints
@@ -131,7 +131,7 @@ export class CodeRunnerService {
             await this.createAsyncStepsForPromises(codeLines);
 
             // Check if there are pending async operations
-            const eventLoopState = this.asyncHooks.getEventLoopState();
+            const eventLoopState = this.eventLoopTracker.getEventLoopState();
 
             // Filter only user timeouts (not internal Node.js/NestJS timeouts)
             const MAX_REASONABLE_TIMEOUT = 10000; // 10 seconds
@@ -207,7 +207,7 @@ export class CodeRunnerService {
                 console.log('⏱️  Async operations timeout reached');
               }
             } else {
-              this.asyncHooks.disable();
+              this.eventLoopTracker.disable();
             }
 
             clearTimeout(timeout);
@@ -216,14 +216,14 @@ export class CodeRunnerService {
             );
             resolve();
           } catch (error) {
-            this.asyncHooks.disable();
+            this.eventLoopTracker.disable();
             clearTimeout(timeout);
             reject(error instanceof Error ? error : new Error(String(error)));
           }
         });
       } catch (error) {
         clearTimeout(timeout);
-        this.asyncHooks.disable();
+        this.eventLoopTracker.disable();
 
         reject(error instanceof Error ? error : new Error(String(error)));
       }
@@ -267,7 +267,7 @@ export class CodeRunnerService {
           asyncCheck.type === 'Promise.finally')
       ) {
         // Get the current event loop state (after callback executed)
-        const eventLoopState = this.asyncHooks.getEventLoopState();
+        const eventLoopState = this.eventLoopTracker.getEventLoopState();
 
         // Get the last sync step to extract scope
         const syncSteps = this.stepCollector.getSteps();

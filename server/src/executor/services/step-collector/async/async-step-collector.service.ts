@@ -4,11 +4,11 @@ import {
   AsyncExecutionStep,
   AsyncOperationType,
   AsyncOperationInfo,
-} from './async-execution-step.interface';
+} from './interfaces/async-execution-step.interface';
 import { V8InspectorService } from '../../v8-inspector/v8-inspector.service';
 import { ScopeExtractorService } from '../shared/scope-extractor.service';
-import { StackFrame } from '../shared/stack-frame.interface';
-import { AsyncHooksService } from '../../async-hooks/async-hooks.service';
+import { StackFrame } from '../shared/interfaces/stack-frame.interface';
+import { EventLoopTrackerService } from '../../event-loop-tracker/event-loop-tracker.service';
 
 /**
  * Async Step Collector Service
@@ -31,7 +31,7 @@ export class AsyncStepCollectorService {
   constructor(
     private readonly v8Inspector: V8InspectorService,
     private readonly scopeExtractor: ScopeExtractorService,
-    private readonly asyncHooks: AsyncHooksService,
+    private readonly eventLoopTracker: EventLoopTrackerService,
   ) {}
 
   /**
@@ -234,7 +234,7 @@ export class AsyncStepCollectorService {
       code: codeLine.trim(),
       scope,
       callStack: this.buildCallStack(params.callFrames),
-      eventLoop: this.asyncHooks.getEventLoopState(),
+      eventLoop: this.eventLoopTracker.getEventLoopState(),
       asyncOperation: asyncOperationInfo,
       asyncStackTrace,
       asyncStackTraceId: params.asyncStackTraceId

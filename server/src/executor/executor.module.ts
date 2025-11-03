@@ -3,7 +3,7 @@ import { ExecutorService } from './executor.service';
 import {
   V8InspectorService,
   BreakpointService,
-  CodeRunnerService,
+  RuntimeService,
   StepCollectorService,
   ScopeExtractorService,
   VariableSerializerService,
@@ -12,15 +12,15 @@ import {
   ValueSerializer,
   ArraySerializer,
   ObjectSerializer,
-  AsyncHooksService,
+  EventLoopTrackerService,
 } from './services';
 import { UserFunctionParserService } from './services/step-collector/shared/user-function-parser.service';
 import { AsyncStepCollectorService } from './services/step-collector/async/async-step-collector.service';
-import { MicrotaskHandler } from './services/async-hooks/handlers/microtask.handler';
-import { PromiseHandler } from './services/async-hooks/handlers/promise.handler';
-import { TimeoutHandler } from './services/async-hooks/handlers/timeout.handler';
-import { EventLoopStateManager } from './services/async-hooks/state/event-loop-state.manager';
-import { EventStore } from './services/async-hooks/state/event-store';
+import { MicrotaskHandler } from './services/event-loop-tracker/handlers/microtask.handler';
+import { PromiseHandler } from './services/event-loop-tracker/handlers/promise.handler';
+import { TimeoutHandler } from './services/event-loop-tracker/handlers/timeout.handler';
+import { EventLoopStateManager } from './services/event-loop-tracker/state/event-loop-state.manager';
+import { EventStore } from './services/event-loop-tracker/state/event-store';
 
 @Module({
   providers: [
@@ -29,7 +29,7 @@ import { EventStore } from './services/async-hooks/state/event-store';
     // Core services
     V8InspectorService,
     BreakpointService,
-    CodeRunnerService,
+    RuntimeService,
 
     // Step collector
     StepCollectorService,
@@ -49,13 +49,13 @@ import { EventStore } from './services/async-hooks/state/event-store';
     ArraySerializer,
     ObjectSerializer,
 
-    // Async
-    AsyncHooksService,
-    // Async Hooks - State Management
+    // Event Loop Tracker
+    EventLoopTrackerService,
+    // Event Loop Tracker - State Management
     EventLoopStateManager,
     EventStore,
 
-    // Async Hooks - Handlers
+    // Event Loop Tracker - Handlers
     PromiseHandler,
     TimeoutHandler,
     MicrotaskHandler,
