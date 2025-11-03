@@ -31,10 +31,19 @@ export class EventLoopStateManager {
       (p) => p.closure || p.source,
     );
 
-    // Filter out internal/system microtasks too
-    const userMicrotasks = this.microtaskQueue.filter(
-      (m) => m.closure || m.source,
-    );
+    // For microtasks, dynamically get closure/source from the promise
+    // (because closure is attached AFTER microtask is added to queue)
+    const userMicrotasks = this.microtaskQueue
+      .map((m) => {
+        const promise = this.promises.get(m.id);
+        return {
+          ...m,
+          closure: promise?.closure,
+          source: promise?.source,
+          callbackName: promise?.callbackName,
+        };
+      })
+      .filter((m) => m.closure || m.source);
 
     return {
       webAPIs: {

@@ -77,8 +77,10 @@ export class PromiseHandler {
       timestamp: Date.now(),
     });
 
-    // Remove from microtask queue when execution starts
-    this.stateManager.removeFromMicrotaskQueue(asyncId);
+    // NOTE: In Hybrid mode, we DON'T remove from queue
+    // Because callbacks execute outside our control (before first breakpoint)
+    // We want to show what WOULD be in the queue for visualization
+    // this.stateManager.removeFromMicrotaskQueue(asyncId);
   }
 
   /**
