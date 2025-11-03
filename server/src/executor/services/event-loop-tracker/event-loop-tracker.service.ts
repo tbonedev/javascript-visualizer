@@ -18,7 +18,10 @@ import { IGNORED_ASYNC_TYPES } from './constants/ignored-async-types';
 export class EventLoopTrackerService {
   private hook: asyncHooks.AsyncHook | null = null;
   private isTrackingUserCode: boolean = false; // Track only user code operations
-
+  private pendingClosures = new Map<
+    number,
+    { closure: any; source: { line: number; code: string } }
+  >();
   constructor(
     private readonly stateManager: EventLoopStateManager,
     private readonly eventStore: EventStore,
@@ -72,6 +75,7 @@ export class EventLoopTrackerService {
    */
   reset(): void {
     this.isTrackingUserCode = false;
+    this.pendingClosures.clear();
     this.stateManager.reset();
     this.eventStore.clear();
     this.promiseHandler.reset();
@@ -91,6 +95,42 @@ export class EventLoopTrackerService {
    */
   getEvents(): AsyncEvent[] {
     return this.eventStore.getAll();
+  }
+  /**
+   * Register closure for async operation at specific line
+   * Called when we pause on async operation line (setTimeout, Promise.then, etc)
+   */
+  registerClosureForLine(lineNumber: number, closure: any, code: string): void {
+    console.log(
+      `🎯 Registering closure for line ${lineNumber}: ${Object.keys(closure).join(', ')}`,
+    );
+
+    const source = { line: lineNumber, code };
+
+    const timeouts = Array.from(this.stateManager['timeouts'].values());
+
+    if (timeouts.length > 0) {
+      const latestTimeout = timeouts[timeouts.length - 1];
+      if (!latestTimeout.closure) {
+        latestTimeout.closure = closure;
+        latestTimeout.source = source;
+        console.log(`  ✅ Attached closure to timeout ${latestTimeout.id}`);
+        return;
+      }
+    }
+    // Find most recently created promise (highest asyncId)
+    const promises = Array.from(this.stateManager['promises'].values());
+    if (promises.length > 0) {
+      const latestPromise = promises[promises.length - 1];
+      if (!latestPromise.closure) {
+        latestPromise.closure = closure;
+        latestPromise.source = source;
+        console.log(`  ✅ Attached closure to promise ${latestPromise.id}`);
+        return;
+      }
+    }
+
+    console.log(`  ⚠️  No async operation found to attach closure`);
   }
 
   // ========== Async Hooks Callbacks ==========
@@ -117,7 +157,7 @@ export class EventLoopTrackerService {
     // Store resource for later inspection
     this.stateManager.setResource(asyncId, resource);
 
-    // Delegate to specific handlers
+    // Delegate to specific handlers WITHOUT closure (closure will be attached later via registerClosureForLine)
     if (type === 'PROMISE') {
       this.promiseHandler.onInit(asyncId, triggerAsyncId);
     } else if (type === 'Timeout') {
@@ -126,7 +166,6 @@ export class EventLoopTrackerService {
       this.microtaskHandler.onInit(asyncId, triggerAsyncId);
     }
   }
-
   /**
    * Called before async callback execution
    */

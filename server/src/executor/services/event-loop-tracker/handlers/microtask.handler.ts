@@ -15,8 +15,13 @@ export class MicrotaskHandler {
   /**
    * Called when queueMicrotask is created
    */
-  onInit(asyncId: number, triggerAsyncId: number): void {
-    this.stateManager.addMicrotask(asyncId, triggerAsyncId);
+  onInit(
+    asyncId: number,
+    triggerAsyncId: number,
+    closure?: any,
+    source?: { line: number; code: string },
+  ): void {
+    this.stateManager.addMicrotask(asyncId, triggerAsyncId, closure, source);
 
     this.eventStore.add({
       type: 'InitMicrotask',

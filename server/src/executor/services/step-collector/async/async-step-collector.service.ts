@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AsyncOperationType,
-} from './interfaces/async-execution-step.interface';
+import { AsyncOperationType } from './interfaces/async-execution-step.interface';
 
 /**
  * Async Operation Detector Service
@@ -20,10 +18,7 @@ export class AsyncStepCollectorService {
    * Регистрирует async операцию (но НЕ выполняет callback)
    * Просто помечает строку как async для Event Loop визуализации
    */
-  registerAsyncOperation(
-    lineNumber: number,
-    type: AsyncOperationType,
-  ): void {
+  registerAsyncOperation(lineNumber: number, type: AsyncOperationType): void {
     this.asyncLinesMap.set(lineNumber, type);
     console.log(`📝 Registered async operation: ${type} at line ${lineNumber}`);
   }

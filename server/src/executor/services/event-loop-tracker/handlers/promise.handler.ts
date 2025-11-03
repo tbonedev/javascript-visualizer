@@ -22,14 +22,17 @@ export class PromiseHandler {
   /**
    * Called when a Promise is created
    */
-  onInit(asyncId: number, triggerAsyncId: number): void {
-    // Track all promises without filtering
-    this.stateManager.addPromise(asyncId, triggerAsyncId);
-
+  onInit(
+    asyncId: number,
+    parentId: number,
+    closure?: any,
+    source?: { line: number; code: string },
+  ): void {
+    this.stateManager.addPromise(asyncId, parentId, closure, source);
     this.eventStore.add({
       type: 'InitPromise',
       asyncId,
-      triggerAsyncId,
+      triggerAsyncId: parentId,
       timestamp: Date.now(),
     });
   }

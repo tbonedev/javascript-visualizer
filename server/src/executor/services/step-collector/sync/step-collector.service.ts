@@ -122,6 +122,19 @@ export class StepCollectorService implements IStepCollectorService {
     // Извлекаем scope через ScopeExtractor
     const scope = await this.scopeExtractor.extractScope(currentFrame);
 
+    // 🎯 If this is an async operation line, register closure for callback
+    // This closure will be attached to the async operation (setTimeout, Promise.then, etc)
+    const asyncCheck = this.isAsyncLine(codeLine);
+    if (asyncCheck) {
+      // Combine all available variables as closure
+      const closure = {
+        ...scope.global,
+        ...scope.local,
+        ...scope.closure,
+      };
+      this.eventLoopTracker.registerClosureForLine(lineNumber, closure, codeLine.trim());
+    }
+
     // Создаем шаг выполнения
     const step: ExecutionStep = {
       step: this.stepCounter++,
@@ -184,5 +197,23 @@ export class StepCollectorService implements IStepCollectorService {
     this.processingQueue = Promise.resolve(); // Сбрасываем очередь
     this.variableSerializer.reset(); // ← Сбрасываем circular guard!
     this.eventLoopTracker.reset();
+  }
+
+  /**
+   * Check if line is async operation (setTimeout, Promise, etc)
+   */
+  private isAsyncLine(code: string): boolean {
+    const trimmed = code.trim();
+    return (
+      trimmed.includes('setTimeout') ||
+      trimmed.includes('setInterval') ||
+      trimmed.includes('.then(') ||
+      trimmed.includes('.catch(') ||
+      trimmed.includes('.finally(') ||
+      trimmed.includes('queueMicrotask') ||
+      trimmed.includes('process.nextTick') ||
+      trimmed.includes('setImmediate') ||
+      trimmed.startsWith('await ')
+    );
   }
 }

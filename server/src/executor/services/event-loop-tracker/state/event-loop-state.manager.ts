@@ -63,11 +63,18 @@ export class EventLoopStateManager {
 
   // ========== Promise Management ==========
 
-  addPromise(asyncId: number, parentId: number): void {
+  addPromise(
+    asyncId: number,
+    parentId: number,
+    closure?: any,
+    source?: { line: number; code: string },
+  ): void {
     const promiseItem: PromiseItem = {
       id: asyncId,
       parentId,
       status: 'pending',
+      closure,
+      source,
     };
     this.promises.set(asyncId, promiseItem);
   }
@@ -98,12 +105,20 @@ export class EventLoopStateManager {
 
   // ========== Timeout Management ==========
 
-  addTimeout(asyncId: number, callbackName: string, delay?: number): void {
+  addTimeout(
+    asyncId: number,
+    callbackName: string,
+    delay?: number,
+    closure?: any,
+    source?: { line: number; code: string },
+  ): void {
     const timeoutItem: TimeoutItem = {
       id: asyncId,
       callbackName,
       delay,
       createdAt: Date.now(),
+      closure,
+      source,
     };
     this.timeouts.set(asyncId, timeoutItem);
   }
@@ -118,10 +133,17 @@ export class EventLoopStateManager {
 
   // ========== Microtask Management ==========
 
-  addMicrotask(asyncId: number, parentId: number): void {
+  addMicrotask(
+    asyncId: number,
+    parentId: number,
+    closure?: any,
+    source?: { line: number; code: string },
+  ): void {
     const microtaskItem: MicrotaskItem = {
       id: asyncId,
       parentId,
+      closure,
+      source,
     };
     this.microtasks.set(asyncId, microtaskItem);
   }

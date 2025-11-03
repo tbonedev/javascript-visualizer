@@ -15,11 +15,16 @@ export class TimeoutHandler {
   /**
    * Called when setTimeout/setInterval is created
    */
-  onInit(asyncId: number, resource: any): void {
-    const callbackName = resource._onTimeout?.name || 'anonymous';
-    const delay = resource._idleTimeout;
+  onInit(
+    asyncId: number,
+    resource: any,
+    closure?: any,
+    source?: { line: number; code: string },
+  ): void {
+    const callbackName = this.extractCallbackName(resource);
+    const delay = resource?.delay || 0;
 
-    this.stateManager.addTimeout(asyncId, callbackName, delay);
+    this.stateManager.addTimeout(asyncId, callbackName, delay, closure, source);
 
     this.eventStore.add({
       type: 'InitTimeout',
@@ -66,5 +71,17 @@ export class TimeoutHandler {
    */
   reset(): void {
     // No internal state to reset
+  }
+
+  /**
+   * Extract callback name from timeout resource
+   */
+  private extractCallbackName(resource: any): string {
+    // Try to get function name from resource
+    const callback = resource?._onTimeout || resource?.callback;
+    if (callback && typeof callback === 'function') {
+      return callback.name || 'anonymous';
+    }
+    return 'anonymous';
   }
 }

@@ -21,11 +21,25 @@ export interface AsyncEvent {
   timestamp: number;
 }
 
+// 🎯 Source location где создан callback
+export interface CallbackSource {
+  line: number;
+  code: string; // строка кода где создан callback
+}
+
+// 🎯 Closure для callback - захваченные переменные
+export interface CallbackClosure {
+  [key: string]: any;
+}
+
 export interface PromiseItem {
   id: number;
   parentId: number;
   status: 'pending' | 'resolved' | 'rejected';
   callbackName?: string;
+  // 🎯 NEW: closure и source
+  closure?: CallbackClosure;
+  source?: CallbackSource;
 }
 
 export interface TimeoutItem {
@@ -33,12 +47,18 @@ export interface TimeoutItem {
   callbackName: string;
   delay?: number;
   createdAt: number;
+  // 🎯 NEW: closure и source
+  closure?: CallbackClosure;
+  source?: CallbackSource;
 }
 
 export interface MicrotaskItem {
   id: number;
   parentId: number;
   callbackName?: string;
+  // 🎯 NEW: closure и source
+  closure?: CallbackClosure;
+  source?: CallbackSource;
 }
 
 export interface EventLoopState {
