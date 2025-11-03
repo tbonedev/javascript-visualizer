@@ -22,7 +22,10 @@ export class TimeoutHandler {
     source?: { line: number; code: string },
   ): void {
     const callbackName = this.extractCallbackName(resource);
-    const delay = resource?.delay || 0;
+
+    // Extract delay from _idleTimeout (Node.js internal property)
+    const delay =
+      typeof resource?._idleTimeout === 'number' ? resource._idleTimeout : 0;
 
     this.stateManager.addTimeout(asyncId, callbackName, delay, closure, source);
 
@@ -77,10 +80,11 @@ export class TimeoutHandler {
    * Extract callback name from timeout resource
    */
   private extractCallbackName(resource: any): string {
-    // Try to get function name from resource
+    // Try to get function name from resource (Node.js internal properties)
     const callback = resource?._onTimeout || resource?.callback;
     if (callback && typeof callback === 'function') {
-      return callback.name || 'anonymous';
+      const name = callback.name;
+      return typeof name === 'string' && name.length > 0 ? name : 'anonymous';
     }
     return 'anonymous';
   }
