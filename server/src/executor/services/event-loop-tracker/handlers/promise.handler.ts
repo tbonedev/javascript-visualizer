@@ -61,6 +61,8 @@ export class PromiseHandler {
         id: childPromise.id,
         parentId: asyncId,
         callbackName: childPromise.callbackName,
+        closure: childPromise.closure,
+        source: childPromise.source,
       });
     }
   }
