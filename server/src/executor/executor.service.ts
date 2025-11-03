@@ -17,7 +17,10 @@ export class ExecutorService {
   ) {}
 
   /**
-   * Execute code and return execution trace
+   * Execute code and return execution trace (Hybrid mode)
+   *
+   * Режим 1: Sync Code - пошаговое выполнение с scope/callstack
+   * Режим 2: Event Loop - визуализация очередей (без выполнения callbacks)
    */
   async execute(code: string): Promise<ExecutionStep[]> {
     try {
@@ -26,18 +29,17 @@ export class ExecutorService {
 
       await this.v8Inspector.connect();
 
-      // Используем runWithBreakpoints - устанавливаем breakpoints и используем stepOver
+      // Выполняем ТОЛЬКО sync код с breakpoints
+      // Event Loop Tracker работает в фоне и отслеживает состояние
       await this.runtime.runWithBreakpoints(code);
 
-      // Об'єднуємо sync і async steps
-      const syncSteps = this.stepCollector.getSteps();
-      const asyncSteps = this.asyncStepCollector.getAsyncSteps();
+      // Возвращаем ТОЛЬКО sync steps
+      // Каждый step содержит eventLoop snapshot
+      const steps = this.stepCollector.getSteps();
 
-      console.log(`📊 Total steps: ${syncSteps.length} sync + ${asyncSteps.length} async = ${syncSteps.length + asyncSteps.length}`);
+      console.log(`📊 Total steps: ${steps.length} (sync only, with Event Loop snapshots)`);
 
-      // Async steps вже мають правильну нумерацію (продовження після sync)
-      // Просто об'єднуємо масиви
-      return [...syncSteps, ...asyncSteps];
+      return steps;
     } finally {
       this.v8Inspector.disconnect();
       this.stepCollector.reset();

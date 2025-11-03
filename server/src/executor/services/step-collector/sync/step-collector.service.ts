@@ -65,6 +65,20 @@ export class StepCollectorService implements IStepCollectorService {
       return;
     }
 
+    // 🎯 HYBRID MODE: Skip async callbacks (microtasks, timeouts)
+    // Async callbacks have fewer call frames (usually < 4)
+    const isInsideAsyncCallback = params.callFrames.length < 4;
+    if (isInsideAsyncCallback) {
+      console.log('⏭️  Inside async callback, skipping (Hybrid mode)');
+      try {
+        // Resume execution - we don't step through callbacks
+        await this.v8Inspector.post('Debugger.resume');
+      } catch (error) {
+        if (error.code !== 'ERR_INSPECTOR_COMMAND') throw error;
+      }
+      return;
+    }
+
     const currentFrame = params.callFrames[0];
     const location = currentFrame.location;
     const lineNumber = location.lineNumber;

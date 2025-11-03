@@ -17,6 +17,7 @@ import { IGNORED_ASYNC_TYPES } from './constants/ignored-async-types';
 @Injectable()
 export class EventLoopTrackerService {
   private hook: asyncHooks.AsyncHook | null = null;
+  private isTrackingUserCode: boolean = false; // Track only user code operations
 
   constructor(
     private readonly stateManager: EventLoopStateManager,
@@ -59,9 +60,18 @@ export class EventLoopTrackerService {
   }
 
   /**
+   * Start tracking user code operations (called on first breakpoint)
+   */
+  startTrackingUserCode(): void {
+    this.isTrackingUserCode = true;
+    console.log('🎯 Started tracking user code operations');
+  }
+
+  /**
    * Reset all tracking state
    */
   reset(): void {
+    this.isTrackingUserCode = false;
     this.stateManager.reset();
     this.eventStore.clear();
     this.promiseHandler.reset();
@@ -96,6 +106,11 @@ export class EventLoopTrackerService {
   ): void {
     // Filter out system/internal async resources
     if (IGNORED_ASYNC_TYPES.includes(type as any)) {
+      return;
+    }
+
+    // 🎯 Only track operations created DURING user code execution
+    if (!this.isTrackingUserCode) {
       return;
     }
 
