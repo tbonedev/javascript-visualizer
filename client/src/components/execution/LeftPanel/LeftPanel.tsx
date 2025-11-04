@@ -3,6 +3,7 @@
 import { executeCode } from '@/services/api/api';
 import CodeEditor from './CodeEditor';
 import { useState } from 'react';
+import Console from '../RightPanel/Console/Console';
 interface LeftPanelProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
@@ -47,9 +48,10 @@ export default function LeftPanel({
 
   return (
     <div className='flex flex-col h-full p-2.5'>
-      <div className='h-[400px] rounded-3xl overflow-hidden border border-white/[0.08] bg-[#0f0f0f] shadow-lg'>
+      <div className='h-[350px] rounded-3xl overflow-hidden border border-white/[0.08] bg-[#0f0f0f] shadow-lg'>
         <CodeEditor value={code} onChange={setCode} />
       </div>
+
       <div className='flex-1'></div>
 
       {error && (
@@ -58,18 +60,23 @@ export default function LeftPanel({
         </div>
       )}
 
-      <div className='flex flex-col gap-2 mb-2'>
-        <div className='flex items-center gap-2'>
-          <span className='text-emerald-400 text-3xl leading-none -translate-y-1'>
-            →
-          </span>
-          <span className='text-zinc-400 text-base'>Current line</span>
+      <div className='flex items-start gap-3 mb-2'>
+        <div className='flex flex-col gap-2'>
+          <div className='flex items-center gap-2'>
+            <span className='text-emerald-400 text-3xl leading-none -translate-y-1'>
+              →
+            </span>
+            <span className='text-zinc-400 text-base'>Current line</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <span className='text-rose-400 text-3xl leading-none -translate-y-1'>
+              →
+            </span>
+            <span className='text-zinc-400 text-base'>Next line</span>
+          </div>
         </div>
-        <div className='flex items-center gap-2'>
-          <span className='text-rose-400 text-3xl leading-none -translate-y-1'>
-            →
-          </span>
-          <span className='text-zinc-400 text-base'>Next line</span>
+        <div className='ml-auto w-[300px] h-[200px] pr-[2px]'>
+          <Console />
         </div>
       </div>
 
